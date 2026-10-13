@@ -1,0 +1,42 @@
+name: Build codexsu LKM
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codexsu]
+    paths:
+      - 'kernel/**'
+      - 'uapi/**'
+      - '.github/workflows/codexsu-build.yml'
+      - '.github/workflows/ddk-lkm.yml'
+
+permissions:
+  contents: read
+
+env:
+  CODEXSU_PACKAGE: io.github.codexsu.manager
+  CODEXSU_CERT_SIZE: 0x0434
+  CODEXSU_CERT_HASH: 8217b0f227d444b0b23684d6124c18490b7da53e076e970fcef9778c32f55fe4
+
+jobs:
+  lkm:
+    name: ${{ matrix.kmi }} ARM64
+    strategy:
+      fail-fast: false
+      matrix:
+        kmi:
+          - android12-5.10
+          - android13-5.10
+          - android13-5.15
+          - android14-5.15
+          - android14-6.1
+          - android15-6.6
+          - android16-6.12
+          - android17-6.18
+    uses: ./.github/workflows/ddk-lkm.yml
+    with:
+      kmi: ${{ matrix.kmi }}
+      package_name: io.github.codexsu.manager
+      expected_size: 0x0434
+      expected_hash: 8217b0f227d444b0b23684d6124c18490b7da53e076e970fcef9778c32f55fe4
+

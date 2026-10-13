@@ -73,7 +73,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
-private val SegmentedOuterRadius = 16.dp
+private val SegmentedOuterRadius = 8.dp
 private val SegmentedInnerRadius = 4.dp
 private const val SegmentedSpringStiffness = 800f
 private const val SegmentedSpringDamping = 0.9f
@@ -91,11 +91,12 @@ private fun defaultSegmentedColors(): ListItemColors = ListItemDefaults.segmente
 @Composable
 private fun defaultSingleSegmentedShape(index: Int, count: Int): ListItemShapes {
     val base = ListItemDefaults.segmentedShapes(index, count)
-    return if (count == 1) {
-        base.copy(shape = MaterialTheme.shapes.large)
-    } else {
-        base
-    }
+    return base.copy(shape = RoundedCornerShape(
+        topStart = if (index == 0) 8.dp else 2.dp,
+        topEnd = if (index == 0) 8.dp else 2.dp,
+        bottomStart = if (index == count - 1) 8.dp else 2.dp,
+        bottomEnd = if (index == count - 1) 8.dp else 2.dp,
+    ))
 }
 
 @Composable

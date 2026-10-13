@@ -1,10 +1,11 @@
 package me.weishu.kernelsu.ui.component.material
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
@@ -14,12 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TonalCard(
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceBright,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(containerColor),
     shape: Shape = MaterialTheme.shapes.large,
     enabled: Boolean = true,
@@ -33,7 +35,7 @@ fun TonalCard(
         contentColor = contentColor,
     )
     when {
-        onLongClick != null -> Card(
+        onLongClick != null -> OutlinedCard(
             modifier = modifier
                 .clip(shape)
                 .combinedClickable(
@@ -45,21 +47,24 @@ fun TonalCard(
                 ),
             colors = colors,
             shape = shape,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
         ) { content() }
 
-        onClick != null -> Card(
+        onClick != null -> OutlinedCard(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
             colors = colors,
             shape = shape,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
             interactionSource = interactionSource,
         ) { content() }
 
-        else -> Card(
+        else -> OutlinedCard(
             modifier = modifier,
             colors = colors,
             shape = shape,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
         ) { content() }
     }
 }

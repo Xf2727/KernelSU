@@ -19,6 +19,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +42,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +78,10 @@ import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.rebootlistpopup.RebootListPopup
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
+import me.weishu.kernelsu.ui.theme.CodexsuNavy
+import me.weishu.kernelsu.ui.theme.CodexsuMint
+import me.weishu.kernelsu.ui.theme.CodexsuBrandText
+import me.weishu.kernelsu.ui.theme.CodexsuBrandMuted
 
 @Composable
 fun HomePagerMaterial(
@@ -91,8 +101,9 @@ fun HomePagerMaterial(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(13.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            CodexsuBrandCard()
             if (state.checkUpdateEnabled) {
                 UpdateCard(state = state, actions = actions)
             }
@@ -146,6 +157,37 @@ fun HomePagerMaterial(
 }
 
 @Composable
+private fun CodexsuBrandCard() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = CodexsuNavy,
+        contentColor = CodexsuBrandText,
+        shape = RoundedCornerShape(28.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 22.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = CodexsuMint
+            )
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium,
+                    color = CodexsuBrandText)
+                Text(stringResource(R.string.codexsu_tagline), style = MaterialTheme.typography.bodyMedium,
+                    color = CodexsuBrandMuted)
+                Text(stringResource(R.string.codexsu_attribution), style = MaterialTheme.typography.bodySmall,
+                    color = CodexsuMint)
+            }
+        }
+    }
+}
+
+@Composable
 private fun UpdateCard(
     state: HomeUiState,
     actions: HomeActions,
@@ -182,7 +224,7 @@ private fun UpdateCard(
 private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    LargeFlexibleTopAppBar(
+    TopAppBar(
         title = { Text(stringResource(R.string.app_name)) },
         actions = { RebootListPopup() },
         colors = expressiveTopAppBarColors(),
@@ -201,7 +243,7 @@ private fun StatusCard(
         val notInstalled = !ksuActive && state.kernelVersion.isGKI()
 
         val containerColor = if (ksuActive) {
-            MaterialTheme.colorScheme.secondaryContainer
+            MaterialTheme.colorScheme.surface
         } else {
             MaterialTheme.colorScheme.errorContainer
         }
@@ -266,7 +308,16 @@ private fun StatusCard(
             ListItem(
                 modifier = Modifier,
                 leadingContent = {
-                    Icon(statusIcon, contentDescription = statusTitle)
+                    Box(
+                        modifier = Modifier.size(44.dp).background(
+                            if (ksuActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+                            RoundedCornerShape(8.dp)
+                        ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(statusIcon, contentDescription = statusTitle,
+                            tint = if (ksuActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
+                    }
                 },
                 trailingContent = statusTrailing,
                 overlineContent = null,
@@ -300,7 +351,7 @@ private fun StatusCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = statusTitle,
-                            style = MaterialTheme.typography.titleMediumEmphasized
+                            style = MaterialTheme.typography.titleLarge
                         )
                         if (ksuActive && state.isSafeMode) {
                             Spacer(Modifier.width(8.dp))
@@ -400,18 +451,21 @@ private fun InfoCard(
         content: String,
         modifier: Modifier = Modifier,
     ) {
-        SegmentedListItem(
+        ListItem(
             modifier = modifier,
-            headlineContent = { Text(text = label, style = MaterialTheme.typography.bodyLarge) },
+            content = { Text(text = label, style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant) },
             leadingContent = { Icon(imageVector = icon, contentDescription = label) },
             supportingContent = {
                 Text(
                     text = content,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     }
 
     val selinuxDisplay = when (systemInfo.selinuxStatus) {
@@ -432,29 +486,29 @@ private fun InfoCard(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(13.dp),
     ) {
-        SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
-            item {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            run {
                 InfoCardItem(
                     icon = Icons.Filled.Tag,
                     label = stringResource(R.string.home_manager_version),
                     content = systemInfo.managerVersion,
                 )
             }
-            item {
+            run {
                 InfoCardItem(
                     icon = Icons.Filled.DeveloperBoard,
                     label = stringResource(R.string.home_kernel),
                     content = systemInfo.kernelVersion,
                 )
             }
-            item {
+            run {
                 InfoCardItem(
                     icon = Icons.Filled.Smartphone,
                     label = stringResource(R.string.home_device_model),
                     content = systemInfo.deviceModel,
                 )
             }
-            item {
+            run {
                 InfoCardItem(
                     icon = Icons.Filled.Fingerprint,
                     label = stringResource(R.string.home_fingerprint),
@@ -462,15 +516,15 @@ private fun InfoCard(
                 )
             }
         }
-        SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
-            item {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            run {
                 InfoCardItem(
                     icon = Icons.Filled.Security,
                     label = stringResource(R.string.home_selinux_status),
                     content = selinuxDisplay,
                 )
             }
-            item {
+            run {
                 InfoCardItem(
                     icon = Icons.Filled.FilterList,
                     label = stringResource(R.string.home_seccomp_status),

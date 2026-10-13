@@ -1,8 +1,30 @@
 name: Build Manager
 
 on:
+  workflow_dispatch:
+    inputs:
+      package_name:
+        description: Manager application ID
+        required: false
+        default: io.github.codexsu.manager
+        type: string
+      manager_name:
+        description: Manager display name
+        required: false
+        default: codexsu
+        type: string
+      version_code:
+        description: Android version code
+        required: false
+        default: "40005"
+        type: string
+      version_name:
+        description: Manager version name
+        required: false
+        default: 1.1.3-codexsu
+        type: string
   push:
-    branches: [ "main", "dev", "ci" ]
+    branches: [ "codexsu" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-lkm.yml'
@@ -19,7 +41,7 @@ on:
       - 'Cargo.lock'
       - 'Cargo.toml'
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "codexsu" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-lkm.yml'
@@ -38,6 +60,26 @@ on:
   workflow_call:
 
 jobs:
+  codexsu-config:
+    runs-on: ubuntu-latest
+    outputs:
+      package_name: ${{ steps.config.outputs.package_name }}
+      manager_name: ${{ steps.config.outputs.manager_name }}
+      version_code: ${{ steps.config.outputs.version_code }}
+      version_name: ${{ steps.config.outputs.version_name }}
+    steps:
+      - id: config
+        env:
+          INPUT_PACKAGE: ${{ inputs.package_name }}
+          INPUT_NAME: ${{ inputs.manager_name }}
+          INPUT_CODE: ${{ inputs.version_code }}
+          INPUT_VERSION: ${{ inputs.version_name }}
+        run: |
+          echo "package_name=${INPUT_PACKAGE:-io.github.codexsu.manager}" >> "$GITHUB_OUTPUT"
+          echo "manager_name=${INPUT_NAME:-codexsu}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${INPUT_CODE:-40005}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${INPUT_VERSION:-1.1.3-codexsu}" >> "$GITHUB_OUTPUT"
+
   generate-key:
     runs-on: ubuntu-latest
     outputs:
@@ -94,18 +136,19 @@ jobs:
           echo "Certificate hash: $HASH"
 
   build-lkm:
-    needs: generate-key
+    needs: [generate-key, codexsu-config]
     uses: ./.github/workflows/build-lkm.yml
     with:
-      expected_size: ${{ needs.generate-key.outputs.expected_size || '' }}
-      expected_hash: ${{ needs.generate-key.outputs.expected_hash || '' }}
+      package_name: ${{ needs.codexsu-config.outputs.package_name }}
+      expected_size: ${{ needs.generate-key.outputs.expected_size || '0x0434' }}
+      expected_hash: ${{ needs.generate-key.outputs.expected_hash || '8217b0f227d444b0b23684d6124c18490b7da53e076e970fcef9778c32f55fe4' }}
     secrets: inherit
 
   build-ksuinit:
     uses: ./.github/workflows/ksuinit.yml
 
   build-ksud:
-    needs: [build-lkm, build-ksuinit]
+    needs: [build-lkm, build-ksuinit, codexsu-config]
     strategy:
       matrix:
         include:
@@ -117,6 +160,7 @@ jobs:
       target: ${{ matrix.target }}
       pack_lkm: true
       pack_ksuinit: true
+      package_name: ${{ needs.codexsu-config.outputs.package_name }}
   
   build-ksud-extra:
     needs: [build-lkm, build-ksuinit]
@@ -141,8 +185,8 @@ jobs:
       pack_ksuinit: true
 
   build-manager:
-    needs: [generate-key]
-    if: always() && needs.generate-key.result == 'success'
+    needs: [generate-key, codexsu-config]
+    if: always() && needs.generate-key.result == 'success' && needs.codexsu-config.result == 'success'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -192,11 +236,17 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build with Gradle
+        env:
+          KSU_PACKAGE_NAME: ${{ needs.codexsu-config.outputs.package_name }}
+          KSU_NAME: ${{ needs.codexsu-config.outputs.manager_name }}
         run: |
+          echo "CODEXSU_VERSION_CODE=${{ needs.codexsu-config.outputs.version_code }}" >> gradle.properties
+          echo "CODEXSU_VERSION_NAME=${{ needs.codexsu-config.outputs.version_name }}" >> gradle.properties
+          echo "CODEXSU_ABIS=arm64-v8a,x86_64" >> gradle.properties
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            ./gradlew clean assembleRelease -PIS_PR_BUILD=true
+            ./gradlew clean assembleRelease -PIS_PR_BUILD=true -PKSU_PACKAGE_NAME="$KSU_PACKAGE_NAME" -PKSU_NAME="$KSU_NAME"
           else
-            ./gradlew clean assembleRelease
+            ./gradlew clean assembleRelease -PKSU_PACKAGE_NAME="$KSU_PACKAGE_NAME" -PKSU_NAME="$KSU_NAME"
           fi
 
       - name: Upload build artifact

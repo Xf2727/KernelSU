@@ -1,6 +1,7 @@
 package me.weishu.kernelsu.ui.screen.home
 
 import androidx.compose.runtime.Immutable
+import me.weishu.kernelsu.BuildConfig
 import me.weishu.kernelsu.KernelVersion
 import me.weishu.kernelsu.ui.util.module.LatestVersionInfo
 
@@ -24,6 +25,7 @@ data class HomeUiState(
     val latestVersionInfo: LatestVersionInfo,
     val currentManagerVersionCode: Long,
     val systemInfo: SystemInfo,
+    val bundledLkmVersionCode: Int = BuildConfig.BUNDLED_LKM_VERSION_CODE,
 ) {
     val isSELinuxPermissive: Boolean
         get() = systemInfo.selinuxStatus == "Permissive"
@@ -35,7 +37,7 @@ data class HomeUiState(
         get() = isManager &&
                 lkmMode == true &&
                 isLkmBundled &&
-                ksuVersion?.toLong() != currentManagerVersionCode &&
+                ksuVersion?.let { it < bundledLkmVersionCode } == true &&
                 !requiresNewKernel &&
                 !requiresNewManager
 

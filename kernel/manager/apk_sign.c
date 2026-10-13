@@ -115,7 +115,7 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
     if (certificate_size > INT_MAX || certificate_size > (u64)(certificates_end - *pos))
         return false;
 
-#define CERT_MAX_LENGTH 1024
+#define CERT_MAX_LENGTH 4096
     if (certificate_size != expected_size)
         return false;
 
@@ -124,12 +124,19 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
         return false;
     }
 
-    char cert[CERT_MAX_LENGTH];
-    if (!read_exact(fp, cert, certificate_size, pos, certificates_end))
+    unsigned char *cert = kmalloc(certificate_size, GFP_KERNEL);
+    if (!cert)
         return false;
 
+    if (!read_exact(fp, cert, certificate_size, pos, certificates_end)) {
+        kfree(cert);
+        return false;
+    }
+
     unsigned char digest[SHA256_DIGEST_SIZE];
-    if (ksu_sha256(cert, certificate_size, digest)) {
+    int hash_ret = ksu_sha256(cert, certificate_size, digest);
+    kfree(cert);
+    if (hash_ret) {
         pr_info("sha256 error\n");
         return false;
     }

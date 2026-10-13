@@ -13,6 +13,10 @@ on:
         required: false
         type: boolean
         default: false
+      package_name:
+        required: false
+        type: string
+        default: me.weishu.kernelsu
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -59,9 +63,10 @@ jobs:
     - name: Build ksud
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        KSU_PACKAGE_NAME: ${{ inputs.package_name }}
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then
-          export KSU_PACKAGE_NAME="me.weishu.kernelsu.pr"
+          export KSU_PACKAGE_NAME="${KSU_PACKAGE_NAME}.pr"
         fi
         if [ "${{ inputs.target }}" = riscv64-linux-android ]; then
           source .github/scripts/setup-rust-build.sh riscv64-linux-android 35

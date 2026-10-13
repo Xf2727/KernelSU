@@ -737,13 +737,13 @@ private fun ModuleItem(
                 val moduleAuthor = stringResource(id = R.string.module_author)
 
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.8f)
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
                     Text(
                         text = module.name,
                         fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.titleMedium,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                         textDecoration = textDecoration,
                     )
 
@@ -762,10 +762,9 @@ private fun ModuleItem(
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                 ) {
                     ExpressiveSwitch(

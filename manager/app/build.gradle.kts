@@ -23,8 +23,8 @@ val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
 
 val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
-val defaultManagerPackageName = if (isPrBuild) "me.weishu.kernelsu.pr" else "me.weishu.kernelsu"
-val defaultManagerName = if (isPrBuild) "KernelSU PR" else "KernelSU"
+val defaultManagerPackageName = if (isPrBuild) "io.github.codexsu.manager.pr" else "io.github.codexsu.manager"
+val defaultManagerName = if (isPrBuild) "codexsu PR" else "codexsu"
 val managerPackageName = project.findProperty("KSU_PACKAGE_NAME")?.toString() ?: defaultManagerPackageName
 val managerName = project.findProperty("KSU_NAME")?.toString() ?: defaultManagerName
 
@@ -140,6 +140,7 @@ android {
     }
     buildToolsVersion = androidBuildToolsVersion
     ndkVersion = androidCompileNdkVersion
+    providers.gradleProperty("CODEXSU_NDK_PATH").orNull?.let { ndkPath = it }
 
     defaultConfig {
         minSdk = androidMinSdkVersion
@@ -149,6 +150,7 @@ android {
         applicationId = managerPackageName
 
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
+        buildConfigField("int", "BUNDLED_LKM_VERSION_CODE", "40004")
         resValue("string", "app_name", managerName)
 
         externalNativeBuild {
@@ -160,7 +162,9 @@ android {
         }
 
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64", "riscv64")
+            // Include only architectures with matching, source-built ksud binaries.
+            abiFilters += (project.findProperty("CODEXSU_ABIS")?.toString()
+                ?: "arm64-v8a,x86_64").split(",").map { it.trim() }
         }
     }
 
