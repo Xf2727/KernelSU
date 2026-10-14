@@ -47,6 +47,10 @@ jobs:
           fi
           test -n "$REVISION" || { echo "No common branch or release tag for $COMMON_BRANCH"; exit 1; }
           export REVISION
+          SYNC_TAG_FLAGS=(--no-tags)
+          if [[ "$REVISION" == refs/tags/* ]]; then
+            SYNC_TAG_FLAGS=()
+          fi
           python3 - <<'PY'
           import os
           import xml.etree.ElementTree as ET
@@ -60,7 +64,7 @@ jobs:
           print('Selected common revision:', os.environ['REVISION'])
           PY
           for attempt in 1 2 3; do
-            if "$HOME/bin/repo" sync -c -j4 --no-tags --no-clone-bundle --retry-fetches=3; then
+            if timeout 15m "$HOME/bin/repo" sync -c -j4 "${SYNC_TAG_FLAGS[@]}" --no-clone-bundle --retry-fetches=3 2>&1 | tee "$GITHUB_WORKSPACE/gki-sync.log"; then
               break
             fi
             [ "$attempt" -lt 3 ] || exit 1
@@ -84,7 +88,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/gki-dist"
           tools/bazel build --config=fast --lto=thin \
             --defconfig_fragment=//common:arch/arm64/configs/codexsu.fragment \
-            //common:kernel_aarch64_dist 2>&1 | tee "$GITHUB_WORKSPACE/gki-build.log"
+            //common:kernel_aarch64/Image 2>&1 | tee "$GITHUB_WORKSPACE/gki-build.log"
           cp bazel-bin/common/kernel_aarch64/Image "$GITHUB_WORKSPACE/gki-dist/Image"
           test -s "$GITHUB_WORKSPACE/gki-dist/Image"
       - name: Package AnyKernel3
@@ -109,6 +113,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: codexsu-gki-build-log
-          path: gki-build.log
+          path: |
+            gki-build.log
+            gki-sync.log
           if-no-files-found: ignore
 
