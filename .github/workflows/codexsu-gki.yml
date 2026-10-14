@@ -1,0 +1,64 @@
+name: Build codexsu GKI
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_branch:
+        description: AOSP kernel manifest branch or tag (Android 14 / 6.1)
+        type: string
+        default: common-android14-6.1
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  gki:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: codexsu
+          fetch-depth: 0
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git curl python3 rsync flex bison libssl-dev libelf-dev zip unzip build-essential
+          mkdir -p "$HOME/bin"
+          curl --fail --location https://storage.googleapis.com/git-repo-downloads/repo -o "$HOME/bin/repo"
+          chmod +x "$HOME/bin/repo"
+      - name: Download AOSP kernel sources
+        env:
+          MANIFEST_BRANCH: ${{ inputs.manifest_branch }}
+        run: |
+          mkdir android-kernel
+          cd android-kernel
+          "$HOME/bin/repo" init -u https://android.googlesource.com/kernel/manifest -b "$MANIFEST_BRANCH" --depth=1
+          "$HOME/bin/repo" sync -c -j4 --no-tags --fail-fast
+          "$HOME/bin/repo" manifest -r -o "$GITHUB_WORKSPACE/kernel-manifest.xml"
+      - name: Integrate codexsu in GKI
+        run: |
+          cd android-kernel
+          test -f common/arch/arm64/configs/gki_defconfig
+          grep -q '^VERSION = 6$' common/Makefile
+          grep -q '^PATCHLEVEL = 1$' common/Makefile
+          ln -s "$GITHUB_WORKSPACE/codexsu/kernel" common/drivers/kernelsu
+          printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> common/drivers/Makefile
+          printf '\nsource "drivers/kernelsu/Kconfig"\n' >> common/drivers/Kconfig
+          printf '\nCONFIG_KSU=y\n' >> common/arch/arm64/configs/gki_defconfig
+      - name: Build GKI with Kleaf
+        run: |
+          cd android-kernel
+          tools/bazel run --config=fast //common:kernel_aarch64_dist -- --dist_dir="$GITHUB_WORKSPACE/gki-dist"
+      - name: Record source and compatibility information
+        run: |
+          cp kernel-manifest.xml gki-dist/
+          printf 'CodexSU source: %s\nPackage: codexsu.me\nMode: built-in GKI\nManifest: %s\nNot verified for any device. Check stock boot, KMI generation, SPL, compression and AVB before installation.\n' \
+            "$GITHUB_SHA" '${{ inputs.manifest_branch }}' > gki-dist/CODEXSU-BUILD.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: codexsu-gki-android14-6.1
+          path: gki-dist/
+          if-no-files-found: error
+
