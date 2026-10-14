@@ -78,6 +78,11 @@ jobs:
           grep -q '^VERSION = 6$' common/Makefile
           grep -q '^PATCHLEVEL = 1$' common/Makefile
           cp -a "$GITHUB_WORKSPACE/codexsu/kernel" common/drivers/kernelsu
+          # include/uapi links to the repository-level uapi directory.
+          # Materialize it inside common so Kleaf's sandbox sees every header.
+          rm common/drivers/kernelsu/include/uapi
+          cp -a "$GITHUB_WORKSPACE/codexsu/uapi" common/drivers/kernelsu/include/uapi
+          test -s common/drivers/kernelsu/include/uapi/app_profile.h
           printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> common/drivers/Makefile
           printf '\nsource "drivers/kernelsu/Kconfig"\n' >> common/drivers/Kconfig
           printf 'CONFIG_KSU=y\n' > common/arch/arm64/configs/codexsu.fragment
