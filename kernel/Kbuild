@@ -117,7 +117,7 @@ endif
 
 
 # Calculate version if git version is available
-KSU_CODEXSU_VERSION ?= 40006
+KSU_CODEXSU_VERSION ?= 40007
 ifdef KSU_CODEXSU_VERSION
 ccflags-y += -DKSU_VERSION=$(KSU_CODEXSU_VERSION)
 else ifdef KSU_GIT_VERSION_VALID
@@ -136,9 +136,9 @@ $(info -- KSU_NEW_DCACHE_FLUSH: $(KSU_NEW_DCACHE_FLUSH))
 
 KSU_IS_PR_BUILD ?= 0
 ifeq ($(KSU_IS_PR_BUILD),0)
-KSU_PACKAGE_NAME ?= io.github.codexsu.manager
+KSU_PACKAGE_NAME ?= codexsu.me
 else
-KSU_PACKAGE_NAME ?= io.github.codexsu.manager.pr
+KSU_PACKAGE_NAME ?= codexsu.me.pr
 endif
 KSU_EXPECTED_SIZE ?= 0x0434
 KSU_EXPECTED_HASH ?= 8217b0f227d444b0b23684d6124c18490b7da53e076e970fcef9778c32f55fe4

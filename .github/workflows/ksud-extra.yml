@@ -19,6 +19,8 @@ on:
         default: false
 jobs:
   build:
+    env:
+      KSU_PACKAGE_NAME: codexsu.me
     runs-on: ${{ inputs.os }}
     steps:
     - uses: actions/checkout@v7

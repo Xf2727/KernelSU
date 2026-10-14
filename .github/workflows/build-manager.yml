@@ -6,7 +6,7 @@ on:
       package_name:
         description: Manager application ID
         required: false
-        default: io.github.codexsu.manager
+        default: codexsu.me
         type: string
       manager_name:
         description: Manager display name
@@ -21,7 +21,7 @@ on:
       version_name:
         description: Manager version name
         required: false
-        default: 1.1.4-codexsu
+        default: 1.1.5-codexsu
         type: string
   push:
     branches: [ "codexsu" ]
@@ -75,12 +75,12 @@ jobs:
           INPUT_CODE: ${{ inputs.version_code }}
           INPUT_VERSION: ${{ inputs.version_name }}
         run: |
-          echo "package_name=${INPUT_PACKAGE:-io.github.codexsu.manager}" >> "$GITHUB_OUTPUT"
+          echo "package_name=${INPUT_PACKAGE:-codexsu.me}" >> "$GITHUB_OUTPUT"
           echo "manager_name=${INPUT_NAME:-codexsu}" >> "$GITHUB_OUTPUT"
           CODE="${INPUT_CODE:-$((40007 + GITHUB_RUN_NUMBER))}"
           [[ "$CODE" =~ ^[0-9]+$ ]] && [ "$CODE" -le 2100000000 ] && [ "$CODE" -ge 40007 ]
           echo "version_code=$CODE" >> "$GITHUB_OUTPUT"
-          echo "version_name=${INPUT_VERSION:-1.1.4-codexsu}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${INPUT_VERSION:-1.1.5-codexsu}" >> "$GITHUB_OUTPUT"
 
   generate-key:
     runs-on: ubuntu-latest

@@ -16,7 +16,7 @@ on:
       package_name:
         required: false
         type: string
-        default: me.weishu.kernelsu
+        default: codexsu.me
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 env:
-  CODEXSU_PACKAGE: io.github.codexsu.manager
+  CODEXSU_PACKAGE: codexsu.me
   CODEXSU_CERT_SIZE: 0x0434
   CODEXSU_CERT_HASH: 8217b0f227d444b0b23684d6124c18490b7da53e076e970fcef9778c32f55fe4
 
@@ -36,7 +36,7 @@ jobs:
     uses: ./.github/workflows/ddk-lkm.yml
     with:
       kmi: ${{ matrix.kmi }}
-      package_name: io.github.codexsu.manager
+      package_name: codexsu.me
       expected_size: 0x0434
       expected_hash: 8217b0f227d444b0b23684d6124c18490b7da53e076e970fcef9778c32f55fe4
 

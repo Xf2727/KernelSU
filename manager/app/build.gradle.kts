@@ -23,7 +23,7 @@ val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
 
 val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
-val defaultManagerPackageName = if (isPrBuild) "io.github.codexsu.manager.pr" else "io.github.codexsu.manager"
+val defaultManagerPackageName = if (isPrBuild) "codexsu.me.pr" else "codexsu.me"
 val defaultManagerName = if (isPrBuild) "codexsu PR" else "codexsu"
 val managerPackageName = project.findProperty("KSU_PACKAGE_NAME")?.toString() ?: defaultManagerPackageName
 val managerName = project.findProperty("KSU_NAME")?.toString() ?: defaultManagerName
@@ -150,7 +150,7 @@ android {
         applicationId = managerPackageName
 
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
-        buildConfigField("int", "BUNDLED_LKM_VERSION_CODE", "40006")
+        buildConfigField("int", "BUNDLED_LKM_VERSION_CODE", "40007")
         resValue("string", "app_name", managerName)
 
         externalNativeBuild {
