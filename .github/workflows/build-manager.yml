@@ -16,7 +16,7 @@ on:
       version_code:
         description: Android version code
         required: false
-        default: "40006"
+        default: ""
         type: string
       version_name:
         description: Manager version name
@@ -77,7 +77,9 @@ jobs:
         run: |
           echo "package_name=${INPUT_PACKAGE:-io.github.codexsu.manager}" >> "$GITHUB_OUTPUT"
           echo "manager_name=${INPUT_NAME:-codexsu}" >> "$GITHUB_OUTPUT"
-          echo "version_code=${INPUT_CODE:-40006}" >> "$GITHUB_OUTPUT"
+          CODE="${INPUT_CODE:-$((40007 + GITHUB_RUN_NUMBER))}"
+          [[ "$CODE" =~ ^[0-9]+$ ]] && [ "$CODE" -le 2100000000 ] && [ "$CODE" -ge 40007 ]
+          echo "version_code=$CODE" >> "$GITHUB_OUTPUT"
           echo "version_name=${INPUT_VERSION:-1.1.4-codexsu}" >> "$GITHUB_OUTPUT"
 
   generate-key:
@@ -365,4 +367,36 @@ jobs:
         with:
           name: manager
           path: dist/*.apk
+
+  publish-release:
+    needs: [repack-manager, codexsu-config]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/codexsu'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: manager
+          path: release-apk
+      - name: Publish signed APK to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_CODE: ${{ needs.codexsu-config.outputs.version_code }}
+          RELEASE_NAME: ${{ needs.codexsu-config.outputs.version_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          mapfile -t APKS < <(find release-apk -type f -name '*.apk')
+          [ "${#APKS[@]}" -eq 1 ]
+          ASSET="codexsu_${RELEASE_CODE}.apk"
+          cp "${APKS[0]}" "$ASSET"
+          TAG="codexsu-${RELEASE_CODE}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" --target "$COMMIT" \
+              --title "codexsu ${RELEASE_NAME} (${RELEASE_CODE})" \
+              --notes "CodexSU signed Manager build ${RELEASE_CODE}. Source: ${COMMIT}." --latest
+          fi
 
