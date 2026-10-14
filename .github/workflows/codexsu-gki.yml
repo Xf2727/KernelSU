@@ -6,7 +6,7 @@ on:
       manifest_branch:
         description: AOSP kernel manifest branch or tag (Android 14 / 6.1)
         type: string
-        default: common-android14-6.1
+        default: common-android14-6.1-2025-01
         required: true
 
 permissions:
@@ -26,7 +26,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git curl python3 rsync flex bison libssl-dev libelf-dev zip unzip build-essential
           mkdir -p "$HOME/bin"
-          curl --fail --location https://storage.googleapis.com/git-repo-downloads/repo -o "$HOME/bin/repo"
+          curl -fsSL --retry 5 --retry-all-errors https://storage.googleapis.com/git-repo-downloads/repo -o "$HOME/bin/repo"
           chmod +x "$HOME/bin/repo"
       - name: Download AOSP kernel sources
         env:
@@ -35,7 +35,13 @@ jobs:
           mkdir android-kernel
           cd android-kernel
           "$HOME/bin/repo" init -u https://android.googlesource.com/kernel/manifest -b "$MANIFEST_BRANCH" --depth=1
-          "$HOME/bin/repo" sync -c -j4 --no-tags --fail-fast
+          for attempt in 1 2 3; do
+            if "$HOME/bin/repo" sync -c -j4 --no-tags --no-clone-bundle --retry-fetches=3; then
+              break
+            fi
+            [ "$attempt" -lt 3 ] || exit 1
+            sleep 15
+          done
           "$HOME/bin/repo" manifest -r -o "$GITHUB_WORKSPACE/kernel-manifest.xml"
       - name: Integrate codexsu in GKI
         run: |
@@ -43,14 +49,27 @@ jobs:
           test -f common/arch/arm64/configs/gki_defconfig
           grep -q '^VERSION = 6$' common/Makefile
           grep -q '^PATCHLEVEL = 1$' common/Makefile
-          ln -s "$GITHUB_WORKSPACE/codexsu/kernel" common/drivers/kernelsu
+          cp -a "$GITHUB_WORKSPACE/codexsu/kernel" common/drivers/kernelsu
           printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> common/drivers/Makefile
           printf '\nsource "drivers/kernelsu/Kconfig"\n' >> common/drivers/Kconfig
-          printf '\nCONFIG_KSU=y\n' >> common/arch/arm64/configs/gki_defconfig
+          printf 'CONFIG_KSU=y\n' > common/arch/arm64/configs/codexsu.fragment
       - name: Build GKI with Kleaf
         run: |
           cd android-kernel
-          tools/bazel run --config=fast //common:kernel_aarch64_dist -- --dist_dir="$GITHUB_WORKSPACE/gki-dist"
+          set -o pipefail
+          mkdir -p "$GITHUB_WORKSPACE/gki-dist"
+          tools/bazel build --config=fast --lto=thin \
+            --defconfig_fragment=//common:arch/arm64/configs/codexsu.fragment \
+            //common:kernel_aarch64_dist 2>&1 | tee "$GITHUB_WORKSPACE/gki-build.log"
+          cp bazel-bin/common/kernel_aarch64/Image "$GITHUB_WORKSPACE/gki-dist/Image"
+          test -s "$GITHUB_WORKSPACE/gki-dist/Image"
+      - name: Package AnyKernel3
+        run: |
+          git clone --depth 1 --branch gki-2.0 https://github.com/WildKernels/AnyKernel3.git AnyKernel3
+          git -C AnyKernel3 rev-parse HEAD > gki-dist/ANYKERNEL-COMMIT.txt
+          cp gki-dist/Image AnyKernel3/Image
+          cd AnyKernel3
+          zip -r "$GITHUB_WORKSPACE/gki-dist/codexsu-android14-6.1-AnyKernel3.zip" . -x '.git/*' '.github/*'
       - name: Record source and compatibility information
         run: |
           cp kernel-manifest.xml gki-dist/
@@ -61,4 +80,11 @@ jobs:
           name: codexsu-gki-android14-6.1
           path: gki-dist/
           if-no-files-found: error
+      - name: Upload compile log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: codexsu-gki-build-log
+          path: gki-build.log
+          if-no-files-found: ignore
 

@@ -14,11 +14,20 @@ APK signing certificates and boot AVB signing keys serve different purposes.
    Run workflow button. If desired, set your fork's default branch to `codexsu`
    in Settings (do not change the upstream repository).
 4. Open Actions > Build codexsu GKI > Run workflow, select `codexsu`.
-5. Choose an AOSP kernel manifest branch/tag. The default `common-android14-6.1`
-   tracks its current source; it does not select a particular phone's kernel.
+5. Choose an AOSP kernel manifest branch/tag. The default
+   `common-android14-6.1-2025-01` follows the reference workflow's 6.1.118
+   monthly source selection; this does not prove compatibility with a phone.
 6. Download `codexsu-gki-android14-6.1` from the successful run's Artifacts.
-   The distribution target determines which Image, modules and boot images
-   are provided. The pinned manifest and CodexSU commit are included.
+   The artifact contains Image and an actual AnyKernel3 ZIP, plus the pinned
+   manifest, CodexSU commit and AnyKernel3 commit. Extract the outer Actions
+   archive to obtain the inner flashable ZIP. No boot image is generated.
+
+The pipeline references Xf2727/GKI_KernelSU_SUSFS's monthly manifest,
+Kleaf defconfig-fragment and WildKernels/AnyKernel3 gki-2.0 packaging approach.
+It integrates this repository's CodexSU source, without SUSFS, KPM or OnePlus
+device-specific patches. Source synchronization retries transient errors and
+compile logs are uploaded even on failure. A removed monthly common branch
+may require selecting a supported manifest/tag; it is not silently replaced.
 
 ## Before installing
 
