@@ -117,7 +117,7 @@ endif
 
 
 # Calculate version if git version is available
-KSU_CODEXSU_VERSION ?= 40007
+KSU_CODEXSU_VERSION ?= 40030
 ifdef KSU_CODEXSU_VERSION
 ccflags-y += -DKSU_VERSION=$(KSU_CODEXSU_VERSION)
 else ifdef KSU_GIT_VERSION_VALID

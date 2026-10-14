@@ -27,7 +27,9 @@ Kleaf defconfig-fragment and WildKernels/AnyKernel3 gki-2.0 packaging approach.
 It integrates this repository's CodexSU source, without SUSFS, KPM or OnePlus
 device-specific patches. Source synchronization retries transient errors and
 compile logs are uploaded even on failure. A removed monthly common branch
-may require selecting a supported manifest/tag; it is not silently replaced.
+is resolved to the deprecated branch or latest numbered release tag for that
+same month, following the reference workflow. The selected revision is logged
+and recorded in the pinned manifest. Network query failures stop the build.
 
 ## Before installing
 

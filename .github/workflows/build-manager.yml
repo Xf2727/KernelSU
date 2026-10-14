@@ -13,11 +13,6 @@ on:
         required: false
         default: codexsu
         type: string
-      version_code:
-        description: Android version code
-        required: false
-        default: ""
-        type: string
       version_name:
         description: Manager version name
         required: false
@@ -68,17 +63,17 @@ jobs:
       version_code: ${{ steps.config.outputs.version_code }}
       version_name: ${{ steps.config.outputs.version_name }}
     steps:
+      - uses: actions/checkout@v7
       - id: config
         env:
           INPUT_PACKAGE: ${{ inputs.package_name }}
           INPUT_NAME: ${{ inputs.manager_name }}
-          INPUT_CODE: ${{ inputs.version_code }}
           INPUT_VERSION: ${{ inputs.version_name }}
         run: |
           echo "package_name=${INPUT_PACKAGE:-codexsu.me}" >> "$GITHUB_OUTPUT"
           echo "manager_name=${INPUT_NAME:-codexsu}" >> "$GITHUB_OUTPUT"
-          CODE="${INPUT_CODE:-$((40007 + GITHUB_RUN_NUMBER))}"
-          [[ "$CODE" =~ ^[0-9]+$ ]] && [ "$CODE" -le 2100000000 ] && [ "$CODE" -ge 40007 ]
+          CODE=$(sed -n 's/^KSU_CODEXSU_VERSION ?= //p' kernel/Kbuild)
+          [[ "$CODE" =~ ^[0-9]+$ ]] && [ "$CODE" -le 2100000000 ]
           echo "version_code=$CODE" >> "$GITHUB_OUTPUT"
           echo "version_name=${INPUT_VERSION:-1.1.5-codexsu}" >> "$GITHUB_OUTPUT"
 

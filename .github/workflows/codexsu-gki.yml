@@ -35,6 +35,30 @@ jobs:
           mkdir android-kernel
           cd android-kernel
           "$HOME/bin/repo" init -u https://android.googlesource.com/kernel/manifest -b "$MANIFEST_BRANCH" --depth=1
+          export COMMON_BRANCH="${MANIFEST_BRANCH#common-}"
+          REMOTE=https://android.googlesource.com/kernel/common
+          REFS=$(git ls-remote "$REMOTE" "refs/heads/$COMMON_BRANCH" "refs/heads/deprecated/$COMMON_BRANCH" "refs/tags/${COMMON_BRANCH}_r*")
+          if grep -q "refs/heads/$COMMON_BRANCH$" <<< "$REFS"; then
+            REVISION="refs/heads/$COMMON_BRANCH"
+          elif grep -q "refs/heads/deprecated/$COMMON_BRANCH$" <<< "$REFS"; then
+            REVISION="refs/heads/deprecated/$COMMON_BRANCH"
+          else
+            REVISION=$(awk '{print $2}' <<< "$REFS" | grep -v '\^{}$' | sort -V | tail -n 1)
+          fi
+          test -n "$REVISION" || { echo "No common branch or release tag for $COMMON_BRANCH"; exit 1; }
+          export REVISION
+          python3 - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          path = '.repo/manifests/default.xml'
+          tree = ET.parse(path)
+          projects = [p for p in tree.iter('project') if p.get('path') == 'common']
+          if len(projects) != 1:
+              raise SystemExit('Expected exactly one common project in manifest')
+          projects[0].set('revision', os.environ['REVISION'])
+          tree.write(path, encoding='utf-8', xml_declaration=True)
+          print('Selected common revision:', os.environ['REVISION'])
+          PY
           for attempt in 1 2 3; do
             if "$HOME/bin/repo" sync -c -j4 --no-tags --no-clone-bundle --retry-fetches=3; then
               break
