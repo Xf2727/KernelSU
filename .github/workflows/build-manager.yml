@@ -16,12 +16,12 @@ on:
       version_code:
         description: Android version code
         required: false
-        default: "40005"
+        default: "40006"
         type: string
       version_name:
         description: Manager version name
         required: false
-        default: 1.1.3-codexsu
+        default: 1.1.4-codexsu
         type: string
   push:
     branches: [ "codexsu" ]
@@ -77,8 +77,8 @@ jobs:
         run: |
           echo "package_name=${INPUT_PACKAGE:-io.github.codexsu.manager}" >> "$GITHUB_OUTPUT"
           echo "manager_name=${INPUT_NAME:-codexsu}" >> "$GITHUB_OUTPUT"
-          echo "version_code=${INPUT_CODE:-40005}" >> "$GITHUB_OUTPUT"
-          echo "version_name=${INPUT_VERSION:-1.1.3-codexsu}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${INPUT_CODE:-40006}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${INPUT_VERSION:-1.1.4-codexsu}" >> "$GITHUB_OUTPUT"
 
   generate-key:
     runs-on: ubuntu-latest

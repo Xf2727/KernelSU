@@ -150,7 +150,7 @@ android {
         applicationId = managerPackageName
 
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
-        buildConfigField("int", "BUNDLED_LKM_VERSION_CODE", "40004")
+        buildConfigField("int", "BUNDLED_LKM_VERSION_CODE", "40006")
         resValue("string", "app_name", managerName)
 
         externalNativeBuild {
