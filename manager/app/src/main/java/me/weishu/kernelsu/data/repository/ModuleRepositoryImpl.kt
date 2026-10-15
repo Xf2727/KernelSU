@@ -20,7 +20,7 @@ class ModuleRepositoryImpl : ModuleRepository {
 
     override suspend fun getModules(): Result<List<Module>> = withContext(Dispatchers.IO) {
         runCatching {
-            val result = listModules()
+            val result = listModules(strict = true)
             val array = JSONArray(result)
             (0 until array.length())
                 .asSequence()

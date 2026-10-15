@@ -140,12 +140,17 @@ fun install() {
     Log.w(TAG, "install result: $result, cost: ${SystemClock.elapsedRealtime() - start}ms")
 }
 
-fun listModules(): String {
+fun listModules(strict: Boolean = false): String {
     val shell = getRootShell()
 
-    val out = shell.newJob()
-        .add("${getKsuDaemonPath()} module list").to(ArrayList(), null).exec().out
-    return out.joinToString("\n").ifBlank { "[]" }
+    val result = shell.newJob()
+        .add("${getKsuDaemonPath()} module list").to(ArrayList(), null).exec()
+    val output = result.out.joinToString("\n")
+    if (strict) {
+        check(result.isSuccess) { "Module list command failed: ${result.code}" }
+        check(output.isNotBlank()) { "Module list command returned no output" }
+    }
+    return output.ifBlank { "[]" }
 }
 
 fun getModuleCount(): Int {

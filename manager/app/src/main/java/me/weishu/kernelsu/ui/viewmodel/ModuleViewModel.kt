@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -236,11 +239,22 @@ class ModuleViewModel(
 
     suspend fun loadModuleList(resort: Boolean = true) {
         val parsedModules = withContext(Dispatchers.IO) {
-            repo.getModules().getOrElse {
-                Log.e(TAG, "fetchModuleList: ", it)
-                emptyList()
+            var loaded: List<Module>? = null
+            for (attempt in 0 until 3) {
+                coroutineContext.ensureActive()
+                val result = repo.getModules()
+                coroutineContext.ensureActive()
+                if (result.isSuccess) {
+                    loaded = result.getOrThrow()
+                    break
+                }
+                val error = result.exceptionOrNull()
+                if (error is CancellationException) throw error
+                Log.e(TAG, "Module list attempt ${attempt + 1} failed", error)
+                if (attempt < 2) delay(300L * (attempt + 1))
             }
-        }
+            loaded
+        } ?: return
 
         withContext(Dispatchers.Main) {
             _uiState.update {
