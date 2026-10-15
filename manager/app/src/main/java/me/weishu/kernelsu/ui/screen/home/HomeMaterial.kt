@@ -294,9 +294,9 @@ private fun StatusCard(
             }
         } else null
 
-        Surface(
+        TonalCard(
             modifier = Modifier.fillMaxWidth(),
-            color = containerColor,
+            containerColor = containerColor,
             contentColor = contentColor,
             shape = MaterialTheme.shapes.large,
             onClick = {

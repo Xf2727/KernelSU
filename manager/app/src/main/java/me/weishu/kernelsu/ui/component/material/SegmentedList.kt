@@ -73,7 +73,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
-private val SegmentedOuterRadius = 8.dp
+private val SegmentedOuterRadius = 22.dp
 private val SegmentedInnerRadius = 4.dp
 private const val SegmentedSpringStiffness = 800f
 private const val SegmentedSpringDamping = 0.9f
@@ -83,8 +83,8 @@ annotation class SegmentedColumnDsl
 
 @Composable
 private fun defaultSegmentedColors(): ListItemColors = ListItemDefaults.segmentedColors(
-    containerColor = colorScheme.surfaceBright,
-    disabledContainerColor = colorScheme.surfaceBright,
+    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+    disabledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
     supportingContentColor = colorScheme.onSurfaceVariant
 )
 
@@ -92,10 +92,10 @@ private fun defaultSegmentedColors(): ListItemColors = ListItemDefaults.segmente
 private fun defaultSingleSegmentedShape(index: Int, count: Int): ListItemShapes {
     val base = ListItemDefaults.segmentedShapes(index, count)
     return base.copy(shape = RoundedCornerShape(
-        topStart = if (index == 0) 8.dp else 2.dp,
-        topEnd = if (index == 0) 8.dp else 2.dp,
-        bottomStart = if (index == count - 1) 8.dp else 2.dp,
-        bottomEnd = if (index == count - 1) 8.dp else 2.dp,
+        topStart = if (index == 0) 22.dp else 6.dp,
+        topEnd = if (index == 0) 22.dp else 6.dp,
+        bottomStart = if (index == count - 1) 22.dp else 6.dp,
+        bottomEnd = if (index == count - 1) 22.dp else 6.dp,
     ))
 }
 
@@ -125,7 +125,7 @@ fun SegmentedColumn(
                         count = if (visibleLen > 0) visibleLen else content.size
                     ),
                 ) {
-                    itemContent()
+                    TonalCard(shape = LocalListItemShapes.current!!.shape) { itemContent() }
                 }
             }
         }
@@ -264,7 +264,7 @@ fun SegmentedItem(
     CompositionLocalProvider(
         LocalListItemShapes provides defaultSingleSegmentedShape(index, count),
     ) {
-        content()
+        TonalCard(shape = LocalListItemShapes.current!!.shape) { content() }
     }
 }
 

@@ -56,7 +56,7 @@ fun MaterialKernelSUTheme(
             extraSmall = RoundedCornerShape(4.dp),
             small = RoundedCornerShape(6.dp),
             medium = RoundedCornerShape(8.dp),
-            large = RoundedCornerShape(8.dp),
+            large = RoundedCornerShape(22.dp),
             extraLarge = RoundedCornerShape(16.dp),
         ),
         content = {
