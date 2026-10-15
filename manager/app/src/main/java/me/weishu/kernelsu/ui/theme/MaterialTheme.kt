@@ -61,7 +61,7 @@ fun MaterialKernelSUTheme(
         ),
         content = {
             MonetColorsProvider.UpdateCss(colorScheme)
-            content()
+            me.weishu.kernelsu.ui.component.material.GlassBackdrop(content)
         }
     )
 }

@@ -11,6 +11,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import top.yukonga.miuix.kmp.blur.drawBackdrop
+import top.yukonga.miuix.kmp.blur.blur
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -33,12 +39,24 @@ fun TonalCard(
     content: @Composable () -> Unit,
 ) {
     val palette = MaterialTheme.colorScheme
-    val glassModifier = modifier.clip(shape).drawWithCache {
+    val backdrop = LocalGlassBackdrop.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed && enabled) 0.98f else 1f, label = "glassPress")
+    val glassModifier = modifier.graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+    }.clip(shape).then(
+        if (backdrop != null) Modifier.drawBackdrop(
+            backdrop = backdrop,
+            shape = { shape },
+            effects = { blur(24.dp.toPx(), 24.dp.toPx()) },
+        ) else Modifier
+    ).drawWithCache {
         val light = Brush.linearGradient(
             listOf(
-                Color.White.copy(alpha = 0.16f),
+                Color.White.copy(alpha = 0.28f),
                 palette.primary.copy(alpha = 0.035f),
-                palette.tertiary.copy(alpha = 0.09f),
+                palette.tertiary.copy(alpha = 0.18f),
             )
         )
         onDrawWithContent {
@@ -55,7 +73,7 @@ fun TonalCard(
         ))
     )
     val colors = CardDefaults.cardColors(
-        containerColor = containerColor.copy(alpha = 0.88f),
+        containerColor = containerColor.copy(alpha = if (backdrop != null) 0.72f else 0.88f),
         contentColor = contentColor,
     )
     when {
