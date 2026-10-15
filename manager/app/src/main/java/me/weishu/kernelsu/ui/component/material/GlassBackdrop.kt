@@ -22,12 +22,12 @@ fun GlassBackdrop(content: @Composable () -> Unit) {
         Canvas(Modifier.matchParentSize().layerBackdrop(backdrop)) {
             drawRect(Color(0xFF132D46))
             drawRect(Brush.radialGradient(
-                listOf(Color(0xFF51DDB5), Color.Transparent),
+                listOf(Color(0xFF51DDB5).copy(alpha = 0.65f), Color.Transparent),
                 center = Offset(size.width * 0.9f, size.height * 0.22f),
                 radius = size.width * 0.95f,
             ))
             drawRect(Brush.radialGradient(
-                listOf(Color(0xFF427CC5), Color.Transparent),
+                listOf(Color(0xFF427CC5).copy(alpha = 0.60f), Color.Transparent),
                 center = Offset(size.width * 0.05f, size.height * 0.8f),
                 radius = size.width * 1.1f,
             ))

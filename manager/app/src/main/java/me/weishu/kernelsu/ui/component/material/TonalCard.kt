@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -40,6 +41,7 @@ fun TonalCard(
 ) {
     val palette = MaterialTheme.colorScheme
     val backdrop = LocalGlassBackdrop.current
+    val dark = palette.surface.luminance() < 0.5f
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed && enabled) 0.98f else 1f, label = "glassPress")
     val glassModifier = modifier.graphicsLayer {
@@ -54,26 +56,28 @@ fun TonalCard(
     ).drawWithCache {
         val light = Brush.linearGradient(
             listOf(
-                Color.White.copy(alpha = 0.28f),
-                palette.primary.copy(alpha = 0.035f),
-                palette.tertiary.copy(alpha = 0.18f),
+                Color.White.copy(alpha = if (dark) 0.12f else 0.45f),
+                Color.Transparent,
+                palette.tertiary.copy(alpha = 0.07f),
             )
         )
         onDrawWithContent {
-            drawContent()
             drawRect(light)
+            drawContent()
         }
     }
     val glassBorder = BorderStroke(
         1.dp,
         Brush.linearGradient(listOf(
-            Color.White.copy(alpha = 0.42f),
-            palette.primary.copy(alpha = 0.12f),
-            palette.tertiary.copy(alpha = 0.28f),
+            Color.White.copy(alpha = if (dark) 0.30f else 0.75f),
+            palette.outlineVariant.copy(alpha = 0.16f),
+            palette.tertiary.copy(alpha = 0.22f),
         ))
     )
     val colors = CardDefaults.cardColors(
-        containerColor = containerColor.copy(alpha = if (backdrop != null) 0.72f else 0.88f),
+        containerColor = containerColor.copy(alpha = if (backdrop != null) {
+            if (dark) 0.82f else 0.90f
+        } else 0.96f),
         contentColor = contentColor,
     )
     when {

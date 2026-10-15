@@ -55,6 +55,14 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -158,8 +166,22 @@ fun HomePagerMaterial(
 
 @Composable
 private fun CodexsuBrandCard() {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed = interaction.collectIsPressedAsState()
+    val scale = animateFloatAsState(if (pressed.value) 0.97f else 1f, label = "brandPress")
+    val turns = remember { mutableIntStateOf(0) }
+    val rotation = animateFloatAsState(turns.intValue * 360f, label = "brandSpin")
+    val haptics = LocalHapticFeedback.current
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            turns.intValue++
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        },
+        interactionSource = interaction,
+        modifier = Modifier.fillMaxWidth().graphicsLayer {
+            scaleX = scale.value
+            scaleY = scale.value
+        },
         color = CodexsuNavy,
         contentColor = CodexsuBrandText,
         shape = RoundedCornerShape(28.dp),
@@ -172,7 +194,7 @@ private fun CodexsuBrandCard() {
             Icon(
                 painter = androidx.compose.ui.res.painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
-                modifier = Modifier.size(56.dp),
+                modifier = Modifier.size(56.dp).graphicsLayer { rotationZ = rotation.value },
                 tint = CodexsuMint
             )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -465,7 +487,10 @@ private fun InfoCard(
             },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f)
+        )
     }
 
     val selinuxDisplay = when (systemInfo.selinuxStatus) {
@@ -486,7 +511,7 @@ private fun InfoCard(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(13.dp),
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        TonalCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
             run {
                 InfoCardItem(
                     icon = Icons.Filled.Tag,
@@ -516,7 +541,7 @@ private fun InfoCard(
                 )
             }
         }
-        Column(modifier = Modifier.fillMaxWidth()) {
+        TonalCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
             run {
                 InfoCardItem(
                     icon = Icons.Filled.Security,
