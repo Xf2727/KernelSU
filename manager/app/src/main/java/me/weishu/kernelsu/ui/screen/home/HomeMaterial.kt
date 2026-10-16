@@ -152,6 +152,14 @@ fun HomePagerMaterial(
                 state = state,
                 actions = actions,
             )
+            Button(
+                onClick = actions.onDiagnosticsClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            ) { Text(stringResource(R.string.home_diagnostics)) }
             InfoCard(systemInfo = state.systemInfo)
             SupportLinks(onOpenUrl = actions.onOpenUrl)
             Spacer(

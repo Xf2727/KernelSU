@@ -167,6 +167,11 @@ fun HomePagerMiuix(
                             state = state,
                             actions = actions,
                         )
+                        TextButton(
+                            text = stringResource(R.string.home_diagnostics),
+                            onClick = actions.onDiagnosticsClick,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                         InfoCard(
                             systemInfo = state.systemInfo,
                             modifier = Modifier.fillMaxWidth(),

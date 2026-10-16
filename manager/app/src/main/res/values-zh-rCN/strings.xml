@@ -5,6 +5,7 @@
     <string name="home_click_to_install">点击安装</string>
     <string name="home_working">工作中</string>
     <string name="home_working_version">版本：%s</string>
+    <string name="home_diagnostics">诊断与构建信息</string>
     <string name="home_lkm_update_available">内嵌 LKM 有可用更新，点击更新</string>
     <string name="home_lkm_custom">自定义</string>
     <string name="home_unsupported">不支持</string>
