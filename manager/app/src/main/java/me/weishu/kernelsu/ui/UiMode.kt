@@ -7,12 +7,9 @@ enum class UiMode(val value: String) {
     Material("material");
 
     companion object {
-        fun fromValue(value: String): UiMode = when (value) {
-            Material.value -> Material
-            else -> Miuix
-        }
+        fun fromValue(value: String): UiMode = Material
 
-        val DEFAULT_VALUE = Miuix.value
+        val DEFAULT_VALUE = Material.value
     }
 }
 
