@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -155,6 +156,16 @@ fun SettingPagerMaterial(
                             supportingContent = { Text("选择一张图片作为 Material 界面背景") },
                             leadingContent = { Icon(Icons.Filled.Image, "自定义图片背景") },
                         )
+                    }
+                    if (uiState.backgroundUri != null) add {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            Text("背景透明度：${(uiState.backgroundAlpha * 100).toInt()}%")
+                            Slider(
+                                value = uiState.backgroundAlpha,
+                                onValueChange = actions.onSetBackgroundAlpha,
+                                valueRange = 0.05f..0.8f,
+                            )
+                        }
                     }
                 }
             )

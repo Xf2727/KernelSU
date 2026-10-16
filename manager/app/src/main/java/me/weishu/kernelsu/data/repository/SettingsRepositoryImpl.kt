@@ -90,6 +90,10 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getString("background_uri", null)
         set(value) = prefs.edit { if (value == null) remove("background_uri") else putString("background_uri", value) }
 
+    override var backgroundAlpha: Float
+        get() = prefs.getFloat("background_alpha", 0.28f)
+        set(value) = prefs.edit { putFloat("background_alpha", value.coerceIn(0.05f, 0.8f)) }
+
     override var enableFloatingBottomBar: Boolean
         get() = prefs.getBoolean("enable_floating_bottom_bar", false)
         set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar", value) }

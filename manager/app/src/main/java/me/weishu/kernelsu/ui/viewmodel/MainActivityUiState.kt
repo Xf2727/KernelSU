@@ -10,6 +10,7 @@ data class MainActivityUiState(
     val pageScale: Float,
     val enableBlur: Boolean,
     val backgroundUri: String?,
+    val backgroundAlpha: Float,
     val enableFloatingBottomBar: Boolean,
     val enableFloatingBottomBarBlur: Boolean,
     val enableNavigationBadge: Boolean,

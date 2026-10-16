@@ -270,9 +270,12 @@ class MainActivity : ComponentActivity() {
                             Box(Modifier.fillMaxSize()) {
                                 uiState.backgroundUri?.let { raw ->
                                     val bitmap = remember(raw) {
-                                        runCatching { contentResolver.openInputStream(Uri.parse(raw))?.use(BitmapFactory::decodeStream) }.getOrNull()
+                                        runCatching {
+                                            val input = if (raw.startsWith("/")) java.io.FileInputStream(raw) else contentResolver.openInputStream(Uri.parse(raw))
+                                            input?.use(BitmapFactory::decodeStream)
+                                        }.getOrNull()
                                     }
-                                    bitmap?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.28f) }
+                                    bitmap?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = uiState.backgroundAlpha) }
                                 }
                                 Box(Modifier.fillMaxSize()) { navDisplay() }
                             }
@@ -448,7 +451,7 @@ fun MainScreen(
 
             when (uiMode) {
                 UiMode.Material -> androidx.compose.material3.Scaffold(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = if (uiState.backgroundUri != null) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
                 ) {
                     Row {
                         SideRail(navigationBadge)
@@ -492,7 +495,7 @@ fun MainScreen(
             when (uiMode) {
                 UiMode.Material -> androidx.compose.material3.Scaffold(
                     bottomBar = bottomBar,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = if (uiState.backgroundUri != null) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
                 ) { innerPadding ->
                     pagerContent(innerPadding.calculateBottomPadding())
                 }

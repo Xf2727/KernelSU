@@ -42,6 +42,7 @@ class SettingsViewModel(
             val pagerInterceptionMode = repo.pagerInterceptionMode
             val enableBlur = repo.enableBlur
             val backgroundUri = repo.backgroundUri
+            val backgroundAlpha = repo.backgroundAlpha
             val enableFloatingBottomBar = repo.enableFloatingBottomBar
             val enableFloatingBottomBarBlur = repo.enableFloatingBottomBarBlur
             val enableNavigationBadge = repo.enableNavigationBadge
@@ -106,6 +107,7 @@ class SettingsViewModel(
                     pagerInterceptionMode = pagerInterceptionMode,
                     enableBlur = enableBlur,
                     backgroundUri = backgroundUri,
+                    backgroundAlpha = backgroundAlpha,
                     enableFloatingBottomBar = enableFloatingBottomBar,
                     enableFloatingBottomBarBlur = enableFloatingBottomBarBlur,
                     enableNavigationBadge = enableNavigationBadge,
@@ -244,6 +246,11 @@ class SettingsViewModel(
     fun setBackgroundUri(uri: String?) {
         repo.backgroundUri = uri
         _uiState.update { it.copy(backgroundUri = uri) }
+    }
+
+    fun setBackgroundAlpha(alpha: Float) {
+        repo.backgroundAlpha = alpha
+        _uiState.update { it.copy(backgroundAlpha = alpha.coerceIn(0.05f, 0.8f)) }
     }
 
     fun setEnableFloatingBottomBar(enabled: Boolean) {
