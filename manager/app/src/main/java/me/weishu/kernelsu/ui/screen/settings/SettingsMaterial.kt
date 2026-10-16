@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
@@ -34,7 +33,6 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -148,24 +146,6 @@ fun SettingPagerMaterial(
                                 )
                             }
                         )
-                    }
-                    add {
-                        SegmentedListItem(
-                            onClick = actions.onSetBackgroundUri,
-                            headlineContent = { Text("自定义图片背景") },
-                            supportingContent = { Text("选择一张图片作为 Material 界面背景") },
-                            leadingContent = { Icon(Icons.Filled.Image, "自定义图片背景") },
-                        )
-                    }
-                    if (uiState.backgroundUri != null) add {
-                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                            Text("背景透明度：${(uiState.backgroundAlpha * 100).toInt()}%")
-                            Slider(
-                                value = uiState.backgroundAlpha,
-                                onValueChange = actions.onSetBackgroundAlpha,
-                                valueRange = 0.05f..0.8f,
-                            )
-                        }
                     }
                 }
             )

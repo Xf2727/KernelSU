@@ -7,11 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.platform.LocalContext
-import java.io.File
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,19 +24,9 @@ fun SettingPager(
     isCurrentPage: Boolean = true,
 ) {
     val viewModel = viewModel<SettingsViewModel>()
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val latestIsCurrentPage by rememberUpdatedState(isCurrentPage)
     val initialResumeHandled = rememberSaveable { mutableStateOf(false) }
-    val backgroundPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { uriValue ->
-            runCatching {
-                val target = File(context.filesDir, "codexsu-background.jpg")
-                context.contentResolver.openInputStream(uriValue)?.use { input -> target.outputStream().use { input.copyTo(it) } }
-                viewModel.setBackgroundUri(target.absolutePath)
-            }
-        }
-    }
 
     LaunchedEffect(isCurrentPage) {
         if (isCurrentPage) {
@@ -60,8 +46,6 @@ fun SettingPager(
         onSetCheckUpdate = viewModel::setCheckUpdate,
         onSetCheckModuleUpdate = viewModel::setCheckModuleUpdate,
         onOpenTheme = { navigator.push(Route.ColorPalette) },
-        onSetBackgroundUri = { backgroundPicker.launch("image/*") },
-        onSetBackgroundAlpha = viewModel::setBackgroundAlpha,
         onSetUiModeIndex = { index ->
             viewModel.setUiMode(if (index == 0) UiMode.Miuix.value else UiMode.Material.value)
         },
