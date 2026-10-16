@@ -86,6 +86,10 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getBoolean("enable_blur", false)
         set(value) = prefs.edit { putBoolean("enable_blur", value) }
 
+    override var backgroundUri: String?
+        get() = prefs.getString("background_uri", null)
+        set(value) = prefs.edit { if (value == null) remove("background_uri") else putString("background_uri", value) }
+
     override var enableFloatingBottomBar: Boolean
         get() = prefs.getBoolean("enable_floating_bottom_bar", false)
         set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar", value) }

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
@@ -145,6 +146,14 @@ fun SettingPagerMaterial(
                                     null
                                 )
                             }
+                        )
+                    }
+                    add {
+                        SegmentedListItem(
+                            onClick = actions.onSetBackgroundUri,
+                            headlineContent = { Text("自定义图片背景") },
+                            supportingContent = { Text("选择一张图片作为 Material 界面背景") },
+                            leadingContent = { Icon(Icons.Filled.Image, "自定义图片背景") },
                         )
                     }
                 }
