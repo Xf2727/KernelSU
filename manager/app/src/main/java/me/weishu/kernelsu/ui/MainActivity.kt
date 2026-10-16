@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -264,7 +265,7 @@ class MainActivity : ComponentActivity() {
 
                     when (uiMode) {
                         UiMode.Material -> androidx.compose.material3.Scaffold(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                            containerColor = if (uiState.backgroundUri != null) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
                         ) { padding ->
                             Box(Modifier.fillMaxSize()) {
                                 uiState.backgroundUri?.let { raw ->
