@@ -203,6 +203,7 @@ class MainActivity : ComponentActivity() {
                         MainScreen(
                             initialPage = selectedMainPage,
                             pagerInterceptionMode = uiState.pagerInterceptionMode,
+                            backgroundEnabled = uiState.backgroundUri != null,
                             onPageChanged = viewModel::setSelectedMainPage,
                         )
                     }
@@ -305,6 +306,7 @@ val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> { error("Loca
 fun MainScreen(
     initialPage: Int = 0,
     pagerInterceptionMode: Int = PagerInterceptionMode.CrossAxisInterceptor.ordinal,
+    backgroundEnabled: Boolean = false,
     onPageChanged: (Int) -> Unit = {},
 ) {
     val navController = LocalNavigator.current
@@ -451,7 +453,7 @@ fun MainScreen(
 
             when (uiMode) {
                 UiMode.Material -> androidx.compose.material3.Scaffold(
-                    containerColor = if (uiState.backgroundUri != null) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = if (backgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
                 ) {
                     Row {
                         SideRail(navigationBadge)
@@ -495,7 +497,7 @@ fun MainScreen(
             when (uiMode) {
                 UiMode.Material -> androidx.compose.material3.Scaffold(
                     bottomBar = bottomBar,
-                    containerColor = if (uiState.backgroundUri != null) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = if (backgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer
                 ) { innerPadding ->
                     pagerContent(innerPadding.calculateBottomPadding())
                 }
