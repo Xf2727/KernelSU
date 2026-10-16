@@ -136,6 +136,7 @@ fun AppProfileScreenMaterial(
             affectedApps = state.appGroup.apps,
             onViewTemplate = actions.onViewTemplate,
             onManageTemplate = actions.onManageTemplate,
+            onTemporaryGrant = actions.onTemporaryGrant,
             onProfileChange = actions.onProfileChange,
         )
     }
@@ -157,6 +158,7 @@ private fun AppProfileInner(
     affectedApps: List<SuperUserViewModel.AppInfo> = emptyList(),
     onViewTemplate: (id: String) -> Unit = {},
     onManageTemplate: () -> Unit = {},
+    onTemporaryGrant: (Long) -> Unit = {},
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
     val isRootGranted = !isSpecialApp && profile.allowSu
@@ -234,6 +236,14 @@ private fun AppProfileInner(
                         title = stringResource(id = R.string.superuser),
                         checked = isRootGranted,
                         onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
+                    )
+                }
+                if (!isSpecialApp) add {
+                    SegmentedListItem(
+                        headlineContent = { Text("临时 Root 授权") },
+                        supportingContent = { Text("授权 15 分钟，到期后自动撤销") },
+                        leadingContent = { Icon(Icons.Filled.Security, null) },
+                        onClick = { onTemporaryGrant(15 * 60 * 1000L) },
                     )
                 }
                 add {

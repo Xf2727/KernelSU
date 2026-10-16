@@ -27,6 +27,7 @@ import me.weishu.kernelsu.ui.util.getSepolicy
 import me.weishu.kernelsu.ui.util.launchApp
 import me.weishu.kernelsu.ui.util.restartApp
 import me.weishu.kernelsu.ui.util.setSepolicy
+import me.weishu.kernelsu.ui.util.TemporaryRootGrantStore
 import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
 import me.weishu.kernelsu.ui.viewmodel.getTemplateInfoById
 
@@ -106,6 +107,10 @@ fun AppProfileScreen(uid: Int) {
         },
         onManageTemplate = {
             navigator.push(Route.AppProfileTemplate)
+        },
+        onTemporaryGrant = { durationMs ->
+            TemporaryRootGrantStore.grant(uid, packageName, durationMs)
+            Natives.setAppProfile(profile.copy(allowSu = true))
         },
         onProfileChange = { updatedProfile ->
             scope.launch {

@@ -23,5 +23,6 @@ data class AppProfileActions(
     val onRestartApp: (String, Int) -> Unit,
     val onViewTemplate: (String) -> Unit,
     val onManageTemplate: () -> Unit,
+    val onTemporaryGrant: (Long) -> Unit,
     val onProfileChange: (Natives.Profile) -> Unit,
 )
