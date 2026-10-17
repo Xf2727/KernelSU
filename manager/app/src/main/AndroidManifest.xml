@@ -108,6 +108,10 @@
                 <action android:name="me.weishu.kernelsu.magica.LAUNCH" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".ui.util.TemporaryRootGrantReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>
