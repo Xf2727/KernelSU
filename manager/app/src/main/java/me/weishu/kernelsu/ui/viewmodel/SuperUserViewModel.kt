@@ -176,11 +176,15 @@ class SuperUserViewModel(
     private fun filterSearchResults(groups: List<GroupedApps>, text: String): List<GroupedApps> {
         if (text.isEmpty()) return emptyList()
 
+        val query = normalizeSearchText(text)
+        if (query.isEmpty()) return groups
+
         return groups.mapNotNull { group ->
             val matchedIdentifiers = group.apps.filter {
-                it.label.contains(text, true) ||
-                        it.displayIdentifier.contains(text, true) ||
-                        PinyinUtil.toPinyin(it.label).contains(text, true)
+                val label = normalizeSearchText(it.label)
+                val packageName = normalizeSearchText(it.displayIdentifier)
+                val pinyin = normalizeSearchText(PinyinUtil.toPinyin(it.label))
+                label.contains(query) || packageName.contains(query) || pinyin.contains(query)
             }.mapTo(linkedSetOf()) { it.displayIdentifier }
 
             if (matchedIdentifiers.isEmpty()) {
@@ -196,6 +200,9 @@ class SuperUserViewModel(
             }
         }
     }
+
+    private fun normalizeSearchText(text: String): String =
+        text.lowercase(Locale.ROOT).filterNot(Char::isWhitespace).filterNot { it in "._-:/\\" }
 
     private suspend fun applySearchText(text: String) {
         _uiState.update {

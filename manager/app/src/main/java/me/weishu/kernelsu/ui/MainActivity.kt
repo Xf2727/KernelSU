@@ -496,7 +496,11 @@ private fun MainScreenBackHandler(
 ) {
     val isPagerBackHandlerEnabled by remember {
         derivedStateOf {
-            navController.current() is Route.Main && navController.backStackSize() == 1 && mainState.selectedPage != 0
+            (navController.current() is Route.Main ||
+                navController.current() is Route.Home ||
+                navController.current() is Route.SuperUser ||
+                navController.current() is Route.Module ||
+                navController.current() is Route.Settings) && mainState.selectedPage != 0
         }
     }
 
