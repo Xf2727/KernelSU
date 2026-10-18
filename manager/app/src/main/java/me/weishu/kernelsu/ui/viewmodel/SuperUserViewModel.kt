@@ -224,7 +224,14 @@ class SuperUserViewModel(
         }
 
         val result = withContext(Dispatchers.IO) {
-            filterSearchResults(_uiState.value.groupedApps, text)
+            val allGroups = synchronized(groupedAppsLock) { cachedGroupedApps }
+            val source = when {
+                allGroups.isNotEmpty() -> allGroups
+                _uiState.value.groupedApps.isNotEmpty() -> _uiState.value.groupedApps
+                apps.isNotEmpty() -> buildCachedGroups(apps)
+                else -> emptyList()
+            }
+            filterSearchResults(source, text)
         }
 
         _uiState.update {

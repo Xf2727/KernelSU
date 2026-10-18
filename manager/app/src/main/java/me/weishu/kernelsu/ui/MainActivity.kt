@@ -7,6 +7,7 @@ import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -399,7 +400,7 @@ fun MainScreen(
                     state = mainPagerState.pagerState,
                     beyondViewportPageCount = if (contentReady) 3 else 0,
                     overscrollEffect = null,
-                    userScrollEnabled = userScrollEnabled && !interceptPagerGestures,
+                    userScrollEnabled = userScrollEnabled,
                     pageNestedScrollConnection = if (interceptPagerGestures) {
                         PagerGestureNestedScrollConnection
                     } else {
@@ -502,6 +503,10 @@ private fun MainScreenBackHandler(
                 navController.current() is Route.Module ||
                 navController.current() is Route.Settings) && mainState.selectedPage != 0
         }
+    }
+
+    BackHandler(enabled = isPagerBackHandlerEnabled) {
+        mainState.animateToPage(0)
     }
 
     val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
