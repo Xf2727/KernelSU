@@ -32,8 +32,6 @@ import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
@@ -138,7 +136,6 @@ fun AppProfileScreenMaterial(
             affectedApps = state.appGroup.apps,
             onViewTemplate = actions.onViewTemplate,
             onManageTemplate = actions.onManageTemplate,
-            onTemporaryGrant = actions.onTemporaryGrant,
             onProfileChange = actions.onProfileChange,
         )
     }
@@ -160,7 +157,6 @@ private fun AppProfileInner(
     affectedApps: List<SuperUserViewModel.AppInfo> = emptyList(),
     onViewTemplate: (id: String) -> Unit = {},
     onManageTemplate: () -> Unit = {},
-    onTemporaryGrant: (Long) -> Unit = {},
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
     val isRootGranted = !isSpecialApp && profile.allowSu
@@ -177,7 +173,6 @@ private fun AppProfileInner(
     var rootMode by rememberSaveable(profile) {
         mutableStateOf(initialRootMode)
     }
-    var showTemporaryGrant by rememberSaveable { mutableStateOf(false) }
     val nonRootMode = if (profile.nonRootUseDefault) Mode.Default else Mode.Custom
     val mode = if (isRootGranted) rootMode else nonRootMode
 
@@ -239,14 +234,6 @@ private fun AppProfileInner(
                         title = stringResource(id = R.string.superuser),
                         checked = isRootGranted,
                         onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
-                    )
-                }
-                if (!isSpecialApp) add {
-                    SegmentedListItem(
-                        headlineContent = { Text("临时 Root 授权") },
-                        supportingContent = { Text("选择授权时长，到期后自动撤销") },
-                        leadingContent = { Icon(Icons.Filled.Security, null) },
-                        onClick = { showTemporaryGrant = true },
                     )
                 }
                 add {
@@ -342,20 +329,7 @@ private fun AppProfileInner(
             }
         }
     }
-    if (showTemporaryGrant) {
-        AlertDialog(
-            onDismissRequest = { showTemporaryGrant = false },
-            title = { Text("临时 Root 授权时长") },
-            text = { Text("选择后立即授予 Root。管理器下次启动时会检查并撤销已过期授权。") },
-            confirmButton = {
-                Column {
-                    TextButton(onClick = { showTemporaryGrant = false; onTemporaryGrant(5 * 60 * 1000L) }) { Text("5 分钟") }
-                    TextButton(onClick = { showTemporaryGrant = false; onTemporaryGrant(15 * 60 * 1000L) }) { Text("15 分钟") }
-                    TextButton(onClick = { showTemporaryGrant = false; onTemporaryGrant(60 * 60 * 1000L) }) { Text("1 小时") }
-                }
-            },
-        )
-    }
+
 }
 
 @Composable

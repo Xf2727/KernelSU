@@ -48,6 +48,10 @@ jobs:
       run: |
         git config --global --add safe.directory /__w/KernelSU/KernelSU
 
+        # Preinit requires installed headers from this target kernel, not host headers.
+        test -n "$KDIR"
+        make -C "$KDIR" headers_install INSTALL_HDR_PATH="$KDIR/usr"
+        test -f "$KDIR/usr/include/linux/unistd.h"
         cd kernel
 
         echo "=== Building kernelsu.ko for KMI: ${{ inputs.kmi }} ==="
@@ -123,6 +127,8 @@ jobs:
             scripts/config --file $KDIR/.config -e CONFIG_CFI_ICALL_NORMALIZE_INTEGERS
         fi
         make O=$KDIR modules_prepare
+        make O=$KDIR headers_install INSTALL_HDR_PATH="$KDIR/usr"
+        test -f "$KDIR/usr/include/linux/unistd.h"
         # Generate SELinux headers through Kbuild in this x86 output tree.
         make O=$KDIR security/selinux/built-in.a
         popd
